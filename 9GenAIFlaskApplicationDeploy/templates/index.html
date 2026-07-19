@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #202123;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .chat-container {
+            width: 900px;
+            height: 90vh;
+            background: #343541;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, .4);
+        }
+
+        .header {
+            background: #202123;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #444654;
+        }
+
+        .header h2 {
+            font-size: 28px;
+        }
+
+        .chat-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 15px;
+            border-radius: 12px;
+            line-height: 1.7;
+            word-wrap: break-word;
+        }
+
+        .user {
+            align-self: flex-end;
+            background: #0d6efd;
+        }
+
+        .assistant {
+            align-self: flex-start;
+            background: #444654;
+        }
+
+        .assistant pre {
+            background: #202123;
+            padding: 15px;
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        .assistant code {
+            background: #202123;
+            padding: 2px 5px;
+            border-radius: 5px;
+        }
+
+        .assistant table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .assistant table,
+        .assistant th,
+        .assistant td {
+            border: 1px solid #666;
+        }
+
+        .assistant th,
+        .assistant td {
+            padding: 10px;
+        }
+
+        .input-area {
+            background: #40414f;
+            padding: 20px;
+        }
+
+        form {
+            display: flex;
+            gap: 15px;
+        }
+
+        textarea {
+            flex: 1;
+            resize: none;
+            border: none;
+            outline: none;
+            border-radius: 12px;
+            background: #343541;
+            color: white;
+            padding: 15px;
+            font-size: 16px;
+            min-height: 65px;
+        }
+
+        button {
+            width: 120px;
+            border: none;
+            border-radius: 12px;
+            background: #10a37f;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background: #0d8c6d;
+        }
+
+        @media(max-width:900px) {
+
+            .chat-container {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            form {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="chat-container">
+
+        <div class="header">
+            <h2>🤖 Gemini Chatbot</h2>
+            <p>Continuous Conversation</p>
+        </div>
+
+        <div class="chat-body" id="chatBody">
+
+            <div class="message assistant">
+                Hello! How can I help you today?
+            </div>
+
+        </div>
+
+        <div class="input-area">
+
+            <form id="chatForm">
+
+                <textarea
+                    id="prompt"
+                    placeholder="Message Gemini..."
+                    required></textarea>
+
+                <button type="submit">
+                    Send
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const form = document.getElementById("chatForm");
+        const promptBox = document.getElementById("prompt");
+        const chatBody = document.getElementById("chatBody");
+
+        form.addEventListener("submit", async function (e) {
+
+            e.preventDefault();
+
+            const prompt = promptBox.value.trim();
+
+            if (!prompt) return;
+
+            chatBody.innerHTML += `
+                <div class="message user">
+                    ${prompt}
+                </div>
+            `;
+
+            promptBox.value = "";
+
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            try {
+
+                const response = await fetch("/chat", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt
+                    })
+                });
+
+                const data = await response.json();
+
+                chatBody.innerHTML += `
+                    <div class="message assistant">
+                        ${data.response}
+                    </div>
+                `;
+
+                chatBody.scrollTop = chatBody.scrollHeight;
+
+            }
+            catch (error) {
+
+                chatBody.innerHTML += `
+                    <div class="message assistant">
+                        Error contacting server.
+                    </div>
+                `;
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>
