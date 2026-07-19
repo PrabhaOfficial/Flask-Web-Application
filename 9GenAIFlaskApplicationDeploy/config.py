@@ -4,4 +4,4 @@ import os
 #load_dotenv()
 
 
-Gemini_API_KEY = "APIkey"
+Gemini_API_KEY = os.getenv("OPENAI_API_KEY")
